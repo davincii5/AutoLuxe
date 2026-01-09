@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AutoLuxe - Management System</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.29/jspdf.plugin.autotable.min.js"></script>
+    
+    <script>
+        tailwind.config = { theme: { extend: { colors: { 'dark-slate': '#0f172a', 'neon-cyan': '#06b6d4', 'electric-purple': '#a855f7' } } } }
+    </script>
+
+    <style>
+        body { font-family: sans-serif; background-color: #0f172a; color: #e2e8f0; transition: all 0.3s ease; }
+        .glass-card { background: rgba(30, 41, 59, 0.6); backdrop-filter: blur(10px); border: 1px solid rgba(148, 163, 184, 0.1); }
+        .sidebar-glass { background: rgba(15, 23, 42, 0.95); border-right: 1px solid rgba(148, 163, 184, 0.1); }
+        .nav-link.active { color: #06b6d4; background: rgba(6, 182, 212, 0.1); border-left: 3px solid #06b6d4; }
+        .hidden { display: none !important; }
+        .fade-in { animation: fadeIn 0.4s ease-out; }
+        .sort-icon { cursor: pointer; margin-left: 5px; opacity: 0.5; transition: 0.3s; }
+        .sort-icon:hover { opacity: 1; color: #06b6d4; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        .car-thumb { transition: transform 0.2s; }
+        .car-thumb:hover { transform: scale(2.5); z-index: 50; position: relative; border-radius: 4px; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.5); }
+        #lang-dropdown { transition: opacity 0.2s ease, transform 0.2s ease; transform-origin: top right; }
+    </style>
+</head>
+<body class="bg-dark-slate min-h-screen">
+
+    <div id="overlay" class="fixed inset-0 bg-black/50 z-40 hidden"></div>
+
+    <aside id="sidebar" class="fixed top-0 h-full w-64 sidebar-glass z-50 transform -translate-x-full lg:translate-x-0 transition-transform duration-300 left-0">
+        <div class="p-6">
+            <h1 class="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-neon-cyan to-electric-purple mb-8">
+                <i class="fas fa-car-side mr-2"></i> AutoLuxe
+            </h1>
+            <nav class="space-y-2">
+                <a href="#" class="nav-link active flex items-center px-4 py-3 rounded text-slate-300 hover:text-neon-cyan" onclick="switchTab('dashboard', this)"><i class="fas fa-chart-pie w-5 mr-3"></i> <span data-i18n="nav_analytics">Analytics</span></a>
+                <a href="#" class="nav-link flex items-center px-4 py-3 rounded text-slate-300 hover:text-neon-cyan" onclick="switchTab('inventory', this)"><i class="fas fa-car w-5 mr-3"></i> <span data-i18n="nav_inventory">Inventory</span></a>
+                <a href="#" class="nav-link flex items-center px-4 py-3 rounded text-slate-300 hover:text-neon-cyan" onclick="switchTab('clients', this)"><i class="fas fa-users w-5 mr-3"></i> <span data-i18n="nav_clients">Clients</span></a>
+                <a href="#" class="nav-link flex items-center px-4 py-3 rounded text-slate-300 hover:text-neon-cyan" onclick="switchTab('orders', this)"><i class="fas fa-file-invoice-dollar w-5 mr-3"></i> <span data-i18n="nav_orders">Orders</span></a>
+                <a href="#" class="nav-link flex items-center px-4 py-3 rounded text-slate-300 hover:text-neon-cyan" onclick="switchTab('employees', this)"><i class="fas fa-id-card w-5 mr-3"></i> <span data-i18n="nav_employees">Employees</span></a>
+                <a href="#" class="nav-link flex items-center px-4 py-3 rounded text-slate-300 hover:text-neon-cyan" onclick="switchTab('services', this)"><i class="fas fa-wrench w-5 mr-3"></i> <span data-i18n="nav_services">Services</span></a>
+            </nav>
+        </div>
+    </aside>
+
+    <div class="lg:ml-64 min-h-screen">
+        <nav class="sticky top-0 z-30 bg-slate-900/80 backdrop-blur-md border-b border-slate-700 px-6 h-16 flex items-center justify-between">
+            <button class="lg:hidden text-white" onclick="toggleSidebar()"><i class="fas fa-bars"></i></button>
+            <div class="flex-1 max-w-md mx-4">
+                <input id="global-search" data-i18n-placeholder="search_placeholder" type="text" placeholder="Search..." class="w-full bg-slate-800/50 border border-slate-700 rounded-full px-4 pl-10 py-2 text-slate-300 focus:border-neon-cyan focus:outline-none">
+            </div>
+            <div class="flex items-center space-x-4">
+                <div class="relative">
+                    <button id="lang-btn" class="flex items-center space-x-2 px-3 py-2 rounded-lg bg-slate-800/50 border border-slate-700 text-slate-300 hover:border-neon-cyan hover:text-neon-cyan transition-all">
+                        <i class="fas fa-globe"></i><span class="hidden sm:inline" id="current-lang">En</span><i class="fas fa-chevron-down text-xs"></i>
+                    </button>
+                    <div id="lang-dropdown" class="hidden absolute right-0 mt-2 w-32 glass-card rounded-lg shadow-lg border border-slate-700 overflow-hidden z-50">
+                        <a href="#" class="lang-option block px-4 py-2 text-slate-300 hover:bg-slate-700/50 hover:text-neon-cyan" onclick="setLanguage('en')">🇬🇧 English</a>
+                        <a href="#" class="lang-option block px-4 py-2 text-slate-300 hover:bg-slate-700/50 hover:text-neon-cyan" onclick="setLanguage('fr')">🇫🇷 Français</a>
+                    </div>
+                </div>
+                <button onclick="logout()" class="text-red-400 hover:text-red-300 flex items-center gap-2"><i class="fas fa-sign-out-alt"></i> <span data-i18n="logout">Logout</span></button>
+            </div>
+        </nav>
+
+        <main class="p-6">
+            <div id="loading" class="text-center text-neon-cyan mt-10 text-xl font-bold">Loading data...</div>
+
+            <div id="dashboard-section" class="page-section hidden fade-in">
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+                    <div class="glass-card p-4 rounded-lg border-l-4 border-neon-cyan"><div class="text-slate-400 text-xs uppercase font-bold" data-i18n="kpi_inventory">Inventory</div><div class="text-2xl font-bold text-white mt-1" id="kpi-cars">0</div></div>
+                    <div class="glass-card p-4 rounded-lg border-l-4 border-electric-purple"><div class="text-slate-400 text-xs uppercase font-bold" data-i18n="kpi_revenue">Revenue</div><div class="text-2xl font-bold text-neon-cyan mt-1" id="kpi-revenue">$0</div></div>
+                    <div class="glass-card p-4 rounded-lg border-l-4 border-blue-500"><div class="text-slate-400 text-xs uppercase font-bold" data-i18n="kpi_clients">Clients</div><div class="text-2xl font-bold text-white mt-1" id="kpi-clients">0</div></div>
+                    <div class="glass-card p-4 rounded-lg border-l-4 border-yellow-500"><div class="text-slate-400 text-xs uppercase font-bold" data-i18n="kpi_pending">Pending Orders</div><div class="text-2xl font-bold text-yellow-400 mt-1" id="kpi-orders">0</div></div>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <div class="glass-card p-4 rounded-lg flex flex-col items-center"><h3 class="text-slate-300 text-sm font-semibold mb-4 w-full" data-i18n="chart_fleet">Fleet Status</h3><div class="w-full h-48 relative"><canvas id="chartDoughnut"></canvas></div></div>
+                    <div class="glass-card p-4 rounded-lg flex flex-col items-center"><h3 class="text-slate-300 text-sm font-semibold mb-4 w-full" data-i18n="chart_fuel">Fuel Types</h3><div class="w-full h-48 relative"><canvas id="chartPie"></canvas></div></div>
+                    <div class="glass-card p-4 rounded-lg flex flex-col items-center"><h3 class="text-slate-300 text-sm font-semibold mb-4 w-full" data-i18n="chart_brands">Brands</h3><div class="w-full h-48 relative"><canvas id="chartRadar"></canvas></div></div>
+                    <div class="glass-card p-4 rounded-lg col-span-1 md:col-span-2 lg:col-span-2"><h3 class="text-slate-300 text-sm font-semibold mb-4" data-i18n="chart_trend">Revenue Trend</h3><div class="w-full h-48 relative"><canvas id="chartLine"></canvas></div></div>
+                    <div class="glass-card p-4 rounded-lg"><h3 class="text-slate-300 text-sm font-semibold mb-4" data-i18n="chart_ranges">Price Ranges</h3><div class="w-full h-48 relative"><canvas id="chartHistogram"></canvas></div></div>
+                    <div class="glass-card p-4 rounded-lg col-span-1 md:col-span-3"><h3 class="text-slate-300 text-sm font-semibold mb-4" data-i18n="chart_analysis">Price Analysis</h3><div class="w-full h-48 relative"><canvas id="chartScatter"></canvas></div></div>
+                </div>
+            </div>
+
+            <div id="inventory-section" class="page-section hidden fade-in">
+                <div class="flex justify-between items-center mb-4">
+                    <h2 class="text-xl font-bold text-white" data-i18n="title_inventory">Car Inventory</h2>
+                    <div class="space-x-2">
+                        <button onclick="exportToCSV()" class="bg-green-700 text-white px-3 py-2 rounded font-bold hover:bg-green-600 text-sm">CSV</button>
+                        <button onclick="exportToPDF()" class="bg-slate-700 text-white px-3 py-2 rounded font-bold hover:bg-slate-600 text-sm">PDF</button>
+                        <button onclick="prepareAddCar()" class="bg-neon-cyan text-slate-900 px-3 py-2 rounded font-bold hover:bg-cyan-400 text-sm" data-i18n="btn_add">+ Add</button>
+                    </div>
+                </div>
+                <div class="glass-card rounded-lg overflow-hidden">
+                    <table class="w-full text-left text-slate-300">
+                        <thead class="bg-slate-800 text-slate-400 uppercase text-xs">
+                            <tr>
+                                <th class="px-6 py-3" data-i18n="th_photo">Photo</th>
+                                <th class="px-6 py-3 cursor-pointer hover:text-white" onclick="sortCars('brand')"><span data-i18n="th_brand">Brand</span> <i class="fas fa-sort sort-icon"></i></th>
+                                <th class="px-6 py-3 cursor-pointer hover:text-white" onclick="sortCars('price')"><span data-i18n="th_price">Price</span> <i class="fas fa-sort sort-icon"></i></th>
+                                <th class="px-6 py-3 cursor-pointer hover:text-white" onclick="sortCars('status')"><span data-i18n="th_status">Status</span> <i class="fas fa-sort sort-icon"></i></th>
+                                <th class="px-6 py-3" data-i18n="th_actions">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="cars-tbody" class="divide-y divide-slate-700"></tbody>
+                    </table>
+                    <div class="flex justify-between items-center p-4 border-t border-slate-700">
+                        <span class="text-sm text-slate-400" id="cars-page-info">Page 1</span>
+                        <div class="space-x-2">
+                            <button onclick="changeCarPage(-1)" class="px-3 py-1 bg-slate-700 text-white rounded hover:bg-slate-600 text-sm" data-i18n="btn_prev">Prev</button>
+                            <button onclick="changeCarPage(1)" class="px-3 py-1 bg-slate-700 text-white rounded hover:bg-slate-600 text-sm" data-i18n="btn_next">Next</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="details-view" class="page-section hidden fade-in">
+                <button onclick="switchTab('inventory')" class="mb-4 text-slate-400 hover:text-white flex items-center gap-2"><i class="fas fa-arrow-left"></i> <span data-i18n="btn_back">Back</span></button>
+                <div class="glass-card p-8 rounded-lg max-w-4xl mx-auto border border-slate-600">
+                    <div class="flex flex-col md:flex-row gap-8">
+                        <div class="md:w-1/2"><img id="detail-img" src="" class="w-full h-64 object-cover rounded-lg shadow-lg border border-slate-700"></div>
+                        <div class="md:w-1/2 flex flex-col justify-center">
+                            <h2 id="detail-title" class="text-3xl font-bold text-white mb-2"></h2>
+                            <div class="space-y-3 text-slate-300 mb-6">
+                                <p><strong data-i18n="lbl_year">Year:</strong> <span id="detail-year" class="text-slate-400"></span></p>
+                                <p><strong data-i18n="lbl_fuel">Fuel:</strong> <span id="detail-fuel" class="text-slate-400"></span></p>
+                                <p><strong data-i18n="lbl_price">Price:</strong> <span id="detail-price" class="text-neon-cyan font-bold text-2xl"></span></p>
+                                <p><strong data-i18n="lbl_status">Status:</strong> <span id="detail-status" class="px-2 py-1 rounded text-sm bg-slate-700"></span></p>
+                            </div>
+                            <button onclick="exportSinglePDF()" class="bg-red-600 text-white px-6 py-3 rounded-lg font-bold hover:bg-red-500 shadow-lg shadow-red-500/20 w-full md:w-auto"><i class="fas fa-file-download mr-2"></i> <span data-i18n="btn_download_pdf">Download PDF</span></button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="clients-section" class="page-section hidden fade-in">
+                <div class="flex justify-between items-center mb-4"><h2 class="text-xl font-bold text-white" data-i18n="title_clients">Clients</h2><button onclick="prepareAddClient()" class="bg-neon-cyan text-slate-900 px-3 py-2 rounded font-bold" data-i18n="btn_add">+ Add</button></div>
+                <div class="glass-card rounded-lg overflow-hidden"><table class="w-full text-left text-slate-300"><thead class="bg-slate-800 text-slate-400 uppercase text-xs"><tr><th class="px-6 py-3" data-i18n="th_name">Name</th><th class="px-6 py-3">Email</th><th class="px-6 py-3" data-i18n="th_city">City</th><th class="px-6 py-3" data-i18n="th_spent">Spent</th><th class="px-6 py-3" data-i18n="th_actions">Actions</th></tr></thead><tbody id="clients-tbody" class="divide-y divide-slate-700"></tbody></table></div>
+            </div>
+            
+            <div id="orders-section" class="page-section hidden fade-in">
+                <div class="flex justify-between items-center mb-4"><h2 class="text-xl font-bold text-white" data-i18n="title_orders">Orders</h2><button onclick="prepareAddOrder()" class="bg-neon-cyan text-slate-900 px-3 py-2 rounded font-bold" data-i18n="btn_add">+ Add</button></div>
+                <div class="glass-card rounded-lg overflow-hidden"><table class="w-full text-left text-slate-300"><thead class="bg-slate-800 text-slate-400 uppercase text-xs"><tr><th class="px-6 py-3">ID</th><th class="px-6 py-3" data-i18n="th_car">Car</th><th class="px-6 py-3" data-i18n="th_client">Client</th><th class="px-6 py-3" data-i18n="th_amount">Amount</th><th class="px-6 py-3" data-i18n="th_status">Status</th><th class="px-6 py-3" data-i18n="th_actions">Actions</th></tr></thead><tbody id="orders-tbody" class="divide-y divide-slate-700"></tbody></table></div>
+            </div>
+
+            <div id="employees-section" class="page-section hidden fade-in">
+                <div class="flex justify-between items-center mb-4"><h2 class="text-xl font-bold text-white" data-i18n="title_employees">Employees</h2><button onclick="prepareAddEmployee()" class="bg-neon-cyan text-slate-900 px-3 py-2 rounded font-bold" data-i18n="btn_add">+ Add</button></div>
+                <div class="glass-card rounded-lg overflow-hidden"><table class="w-full text-left text-slate-300"><thead class="bg-slate-800 text-slate-400 uppercase text-xs"><tr><th class="px-6 py-3" data-i18n="th_name">Name</th><th class="px-6 py-3" data-i18n="th_role">Role</th><th class="px-6 py-3" data-i18n="th_sales">Sales</th><th class="px-6 py-3" data-i18n="th_actions">Actions</th></tr></thead><tbody id="employees-tbody" class="divide-y divide-slate-700"></tbody></table></div>
+            </div>
+            
+            <div id="services-section" class="page-section hidden fade-in">
+                <div class="flex justify-between items-center mb-4"><h2 class="text-xl font-bold text-white" data-i18n="title_services">Services</h2><button onclick="prepareAddService()" class="bg-neon-cyan text-slate-900 px-3 py-2 rounded font-bold" data-i18n="btn_add">+ Add</button></div>
+                <div class="glass-card rounded-lg overflow-hidden"><table class="w-full text-left text-slate-300"><thead class="bg-slate-800 text-slate-400 uppercase text-xs"><tr><th class="px-6 py-3" data-i18n="th_type">Type</th><th class="px-6 py-3" data-i18n="th_date">Date</th><th class="px-6 py-3" data-i18n="th_cost">Cost</th><th class="px-6 py-3" data-i18n="th_actions">Actions</th></tr></thead><tbody id="services-tbody" class="divide-y divide-slate-700"></tbody></table></div>
+            </div>
+        </main>
+    </div>
+
+    <div id="car-modal" class="fixed inset-0 bg-black/80 hidden z-50 flex items-center justify-center backdrop-blur-sm"><div class="glass-card p-6 rounded-lg w-full max-w-md border border-slate-600"><h3 id="car-modal-title" class="text-xl text-white font-bold mb-4">Add Car</h3><form id="car-form" class="space-y-3"><input type="hidden" name="id" id="car-id"><div class="grid grid-cols-2 gap-3"><input name="brand" id="car-brand" placeholder="Brand" class="w-full bg-slate-800 border-slate-600 rounded p-2 text-white" required><input name="model" id="car-model" placeholder="Model" class="w-full bg-slate-800 border-slate-600 rounded p-2 text-white" required></div><div class="grid grid-cols-2 gap-3"><input name="year" id="car-year" type="number" placeholder="Year" class="w-full bg-slate-800 border-slate-600 rounded p-2 text-white" required><input name="fuel_type" id="car-fuel" placeholder="Fuel" class="w-full bg-slate-800 border-slate-600 rounded p-2 text-white" required></div><input name="price" id="car-price" type="number" placeholder="Price" class="w-full bg-slate-800 border-slate-600 rounded p-2 text-white" required><input name="image_url" id="car-image" placeholder="Image URL" class="w-full bg-slate-800 border-slate-600 rounded p-2 text-white"><select name="status" id="car-status" class="w-full bg-slate-800 border-slate-600 rounded p-2 text-white"><option value="Available">Available</option><option value="Sold">Sold</option><option value="Rented">Rented</option></select><div class="flex justify-end mt-4 gap-2"><button type="button" onclick="closeModal('car-modal')" class="text-slate-300" data-i18n="btn_cancel">Cancel</button><button class="bg-neon-cyan px-4 py-2 rounded text-slate-900 font-bold" data-i18n="btn_save">Save</button></div></form></div></div>
+    <div id="order-modal" class="fixed inset-0 bg-black/80 hidden z-50 flex items-center justify-center backdrop-blur-sm"><div class="glass-card p-6 rounded-lg w-full max-w-md border border-slate-600"><h3 id="order-modal-title" class="text-xl text-white font-bold mb-4">Add Order</h3><form id="order-form" class="space-y-3"><input type="hidden" name="id" id="order-id"><div class="grid grid-cols-1 gap-3"><label class="text-sm text-slate-400">Select Car</label><select name="car_id" id="order-car-id" class="w-full bg-slate-800 border border-slate-600 rounded p-2 text-white" required></select></div><div class="grid grid-cols-1 gap-3"><label class="text-sm text-slate-400">Select Client</label><select name="client_id" id="order-client-id" class="w-full bg-slate-800 border border-slate-600 rounded p-2 text-white" required></select></div><input name="amount" id="order-amount" type="number" placeholder="Amount ($)" class="w-full bg-slate-800 border border-slate-600 rounded p-2 text-white" required><select name="status" id="order-status" class="w-full bg-slate-800 border border-slate-600 rounded p-2 text-white"><option value="Pending">Pending</option><option value="Processing">Processing</option><option value="Completed">Completed</option></select><div class="flex justify-end mt-4 gap-2"><button type="button" onclick="closeModal('order-modal')" class="text-slate-300" data-i18n="btn_cancel">Cancel</button><button type="submit" class="bg-neon-cyan px-4 py-2 rounded text-slate-900 font-bold" data-i18n="btn_save">Save</button></div></form></div></div>
+    <div id="client-modal" class="fixed inset-0 bg-black/80 hidden z-50 flex items-center justify-center backdrop-blur-sm"><div class="glass-card p-6 rounded-lg w-full max-w-md border border-slate-600"><h3 id="client-modal-title" class="text-xl text-white font-bold mb-4">Add Client</h3><form id="client-form" class="space-y-3"><input type="hidden" name="id" id="client-id"><input name="name" id="client-name" placeholder="Name" class="w-full bg-slate-800 border border-slate-600 rounded p-2 text-white" required><input name="email" id="client-email" placeholder="Email" class="w-full bg-slate-800 border border-slate-600 rounded p-2 text-white" required><div class="grid grid-cols-2 gap-3"><input name="city" id="client-city" placeholder="City" class="w-full bg-slate-800 border border-slate-600 rounded p-2 text-white"><input name="total_spent" id="client-spent" type="number" placeholder="Spent" class="w-full bg-slate-800 border border-slate-600 rounded p-2 text-white"></div><div class="flex justify-end mt-4 gap-2"><button type="button" onclick="closeModal('client-modal')" class="text-slate-300" data-i18n="btn_cancel">Cancel</button><button type="submit" class="bg-neon-cyan px-4 py-2 rounded text-slate-900 font-bold" data-i18n="btn_save">Save</button></div></form></div></div>
+    <div id="employee-modal" class="fixed inset-0 bg-black/80 hidden z-50 flex items-center justify-center backdrop-blur-sm"><div class="glass-card p-6 rounded-lg w-full max-w-md border border-slate-600"><h3 id="employee-modal-title" class="text-xl text-white font-bold mb-4">Add Employee</h3><form id="employee-form" class="space-y-3"><input type="hidden" name="id" id="employee-id"><input name="name" id="employee-name" placeholder="Full Name" class="w-full bg-slate-800 border border-slate-600 rounded p-2 text-white" required><input name="role" id="employee-role" placeholder="Role" class="w-full bg-slate-800 border-slate-600 rounded p-2 text-white" required><input name="sales_count" id="employee-sales" type="number" placeholder="Sales" class="w-full bg-slate-800 border-slate-600 rounded p-2 text-white"><div class="flex justify-end mt-4 gap-2"><button type="button" onclick="closeModal('employee-modal')" class="text-slate-300" data-i18n="btn_cancel">Cancel</button><button type="submit" class="bg-neon-cyan px-4 py-2 rounded text-slate-900 font-bold" data-i18n="btn_save">Save</button></div></form></div></div>
+    <div id="service-modal" class="fixed inset-0 bg-black/80 hidden z-50 flex items-center justify-center backdrop-blur-sm"><div class="glass-card p-6 rounded-lg w-full max-w-md border border-slate-600"><h3 id="service-modal-title" class="text-xl text-white font-bold mb-4">Add Service</h3><form id="service-form" class="space-y-3"><input type="hidden" name="id" id="service-id"><input name="car_id" id="service-car-id" type="number" placeholder="Car ID" class="w-full bg-slate-800 border border-slate-600 rounded p-2 text-white" required><input name="type" id="service-type" placeholder="Type" class="w-full bg-slate-800 border-slate-600 rounded p-2 text-white" required><input name="date" id="service-date" type="date" class="w-full bg-slate-800 border border-slate-600 rounded p-2 text-white" required><input name="cost" id="service-cost" type="number" placeholder="Cost" class="w-full bg-slate-800 border-slate-600 rounded p-2 text-white" required><div class="flex justify-end mt-4 gap-2"><button type="button" onclick="closeModal('service-modal')" class="text-slate-300" data-i18n="btn_cancel">Cancel</button><button type="submit" class="px-4 py-2 bg-neon-cyan text-slate-900 rounded font-bold" data-i18n="btn_save">Save</button></div></form></div></div>
+
+    <script src="assets/js/auth.js"></script>
+    <script src="assets/js/app.js"></script>
+</body>
+</html>

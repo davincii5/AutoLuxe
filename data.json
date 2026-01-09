@@ -1,0 +1,63 @@
+{
+    "cars": [
+        { "id": 1, "brand": "Ferrari", "model": "488 GTB", "price": 350000, "status": "Available", "year": 2023, "fuel_type": "Gasoline", "image_url": "https://images.unsplash.com/photo-1592198084033-aade902d1aae?auto=format&fit=crop&w=300&q=80" },
+        { "id": 2, "brand": "bugatti", "model": "chiron", "price": 280000, "status": "Sold", "year": 2024, "fuel_type": "Gasoline", "image_url": "https://images.unsplash.com/photo-1544636331-e26879cd4d9b?auto=format&fit=crop&w=300&q=80" },
+        { "id": 3, "brand": "Porsche", "model": "911 Turbo", "price": 220000, "status": "Rented", "year": 2023, "fuel_type": "Gasoline", "image_url": "https://images.unsplash.com/photo-1503376780353-7e6692767b70?auto=format&fit=crop&w=300&q=80" },
+        { "id": 4, "brand": "Tesla", "model": "Model S", "price": 120000, "status": "Available", "year": 2024, "fuel_type": "Electric", "image_url": "https://images.unsplash.com/photo-1617788138017-80ad40651399?auto=format&fit=crop&w=300&q=80" },
+        { "id": 5, "brand": "Mercedes", "model": "cls", "price": 180000, "status": "Available", "year": 2023, "fuel_type": "Gasoline", "image_url": "https://images.unsplash.com/photo-1605559424843-9e4c228bf1c2?auto=format&fit=crop&w=300&q=80" },
+        { "id": 6, "brand": "Renault", "model": "Megane RS", "price": 45000, "status": "Available", "year": 2024, "fuel_type": "Gasoline", "image_url": "https://www.carscoops.com/wp-content/uploads/2020/04/Renault-Megane-Trophy-5.jpg" },
+        { "id": 7, "brand": "BMW", "model": "M4 Comp", "price": 85000, "status": "Sold", "year": 2024, "fuel_type": "Gasoline", "image_url": "https://images.unsplash.com/photo-1617531653332-bd46c24f2068?auto=format&fit=crop&w=300&q=80" },
+        { "id": 8, "brand": "Audi", "model": "R8", "price": 115000, "status": "Available", "year": 2023, "fuel_type": "Hybrid", "image_url": "https://images.unsplash.com/photo-1603584173870-7f23fdae1b7a?auto=format&fit=crop&w=300&q=80" },
+        { "id": 9, "brand": "Lamborghini", "model": "Murcielago", "price": 290000, "status": "Available", "year": 2023, "fuel_type": "Gasoline", "image_url": "https://images.unsplash.com/photo-1621135802920-133df287f89c?auto=format&fit=crop&w=300&q=80" },
+        { "id": 10, "brand": "Ford", "model": "Mustang GT", "price": 55000, "status": "Rented", "year": 2024, "fuel_type": "Gasoline", "image_url": "https://images.unsplash.com/photo-1584345604476-8ec5e12e42dd?auto=format&fit=crop&w=300&q=80" }
+    ],
+    "clients": [
+        { "id": 1, "name": "Alex Sterling", "email": "alex@vip.com", "city": "New York", "total_spent": 350000 },
+        { "id": 2, "name": "Victoria Chen", "email": "v.chen@tech.com", "city": "London", "total_spent": 280000 },
+        { "id": 3, "name": "James Bond", "email": "007@mi6.gov", "city": "London", "total_spent": 50000 },
+        { "id": 4, "name": "Tony Stark", "email": "stark@avengers.com", "city": "Malibu", "total_spent": 1200000 },
+        { "id": 5, "name": "Bruce Wayne", "email": "batman@gotham.com", "city": "Gotham", "total_spent": 450000 },
+        { "id": 6, "name": "Harrison Ford", "email": "han.solo@falcon.com", "city": "Chicago", "total_spent": 55000 },
+        { "id": 7, "name": "Mercedes Benz", "email": "mercedes@luxury.com", "city": "Berlin", "total_spent": 180000 },
+        { "id": 8, "name": "Austin Martin", "email": "austin@powers.com", "city": "Austin", "total_spent": 290000 },
+        { "id": 9, "name": "Shelby Cobra", "email": "shelby@racing.com", "city": "Detroit", "total_spent": 85000 },
+    { "id": 10, "name": "Bentley Cooper", "email": "cooper@mini.com", "city": "Oxford", "total_spent": 45000 },
+    { "id": 11, "name": "HICHAM BOUCHTIB", "email": "bouchtib@gmail.com", "city": "casablanca", "total_spent": 45000 }
+     ],
+    "orders": [
+        { "id": 101, "car_id": 1, "client_id": 1, "amount": 350000, "status": "Completed" },
+        { "id": 102, "car_id": 2, "client_id": 2, "amount": 280000, "status": "Processing" },
+        { "id": 103, "car_id": 3, "client_id": 3, "amount": 220000, "status": "Pending" },
+        { "id": 104, "car_id": 4, "client_id": 4, "amount": 120000, "status": "Completed" },
+        { "id": 105, "car_id": 5, "client_id": 5, "amount": 180000, "status": "Pending" },
+        { "id": 106, "car_id": 6, "client_id": 10, "amount": 45000, "status": "Completed" },
+        { "id": 107, "car_id": 7, "client_id": 9, "amount": 85000, "status": "Processing" },
+        { "id": 108, "car_id": 8, "client_id": 4, "amount": 115000, "status": "Completed" },
+        { "id": 109, "car_id": 9, "client_id": 8, "amount": 290000, "status": "Pending" },
+        { "id": 110, "car_id": 10, "client_id": 6, "amount": 55000, "status": "Completed" }
+    ],
+    "employees": [
+        { "id": 1, "name": "Robert Mitchell", "role": "Sales Manager", "sales_count": 45 },
+        { "id": 2, "name": "Sarah Connor", "role": "Security Head", "sales_count": 0 },
+        { "id": 3, "name": "Lara Croft", "role": "Sales Executive", "sales_count": 32 },
+        { "id": 4, "name": "Nathan Drake", "role": "Logistics", "sales_count": 12 },
+        { "id": 5, "name": "Peter Parker", "role": "Photographer", "sales_count": 5 },
+        { "id": 6, "name": "Vin Diesel", "role": "Transport Lead", "sales_count": 8 },
+        { "id": 7, "name": "Axel Foley", "role": "Head Mechanic", "sales_count": 0 },
+        { "id": 8, "name": "Lewis Hamilton", "role": "Test Driver", "sales_count": 0 },
+        { "id": 9, "name": "Cam Shaft", "role": "Technician", "sales_count": 2 },
+        { "id": 10, "name": "Otto Mobile", "role": "Sales Executive", "sales_count": 28 }
+    ],
+    "services": [
+        { "id": 1, "car_id": 1, "type": "Ceramic Coating", "date": "2024-01-10", "cost": 3500 },
+        { "id": 2, "car_id": 2, "type": "Oil Change", "date": "2024-01-12", "cost": 250 },
+        { "id": 3, "car_id": 3, "type": "Tire Replacement", "date": "2024-01-20", "cost": 4200 },
+        { "id": 4, "car_id": 4, "type": "Battery Check", "date": "2024-01-25", "cost": 0 },
+        { "id": 5, "car_id": 5, "type": "Full Detailing", "date": "2024-02-01", "cost": 500 },
+        { "id": 6, "car_id": 6, "type": "Orange Wrap Polish", "date": "2024-02-10", "cost": 800 },
+        { "id": 7, "car_id": 7, "type": "ECU Tuning", "date": "2024-02-15", "cost": 1200 },
+        { "id": 8, "car_id": 8, "type": "Window Tinting", "date": "2024-02-20", "cost": 400 },
+        { "id": 9, "car_id": 9, "type": "Track Inspection", "date": "2024-03-01", "cost": 1500 },
+        { "id": 10, "car_id": 10, "type": "Exhaust Install", "date": "2024-03-05", "cost": 2200 }
+    ]
+}
