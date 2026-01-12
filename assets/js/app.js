@@ -28,6 +28,7 @@ const translations = {
 
 let db = { cars: [], clients: [], orders: [], employees: [], services: [] }; 
 let charts = {};
+//Tracks the current page and sorting order for the Inventory table.
 let carState = { page: 1, limit: 5, sortCol: null, sortAsc: true };
 let currentDetailItem = null;
 let currentLang = 'en';
@@ -73,6 +74,7 @@ function setupEventListeners() {
             e.stopPropagation();
             langDropdown.classList.toggle('hidden');
         });
+        //waits for the HTML to fully load (DOMContentLoaded) before running any logic.
         document.addEventListener('click', (e) => {
             if (!langBtn.contains(e.target) && !langDropdown.contains(e.target)) {
                 langDropdown.classList.add('hidden');
@@ -82,6 +84,7 @@ function setupEventListeners() {
 }
 
 // --- 3. CORE FUNCTIONS ---
+//Fetches the data.json file asynchronously.
 async function loadData() {
     try {
         const response = await fetch('data.json');
@@ -128,6 +131,7 @@ window.setLanguage = function(lang) {
 };
 
 // --- 4. RENDERERS ---
+//Generates HTML table rows dynamically based on the data in db.
 function renderCars() {
     const tbody = document.getElementById('cars-tbody');
     if(!tbody) return;
@@ -216,6 +220,7 @@ function renderServices(data) {
 }
 
 // --- 5. DASHBOARD & CHARTS ---
+//Calculates totals (KPIs) and prepares data arrays for Chart.js.
 function renderDashboard() {
     document.getElementById('kpi-cars').innerText = db.cars.length;
     document.getElementById('kpi-clients').innerText = db.clients.length;
@@ -262,6 +267,7 @@ function destroyChart(id) { if(charts[id]) charts[id].destroy(); }
 function commonOptions() { return { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { ticks: { color: '#94a3b8' }, grid: { color: '#334155' } }, x: { ticks: { color: '#94a3b8' }, grid: { display: false } } } }; }
 
 // --- 6. WINDOW ACTIONS ---
+//Controls the visibility of UI elements (tabs, modals, sidebar).
 window.switchTab = function(tabId, btn) { 
     document.querySelectorAll('.page-section').forEach(el => el.classList.add('hidden')); 
     const target = document.getElementById(tabId + '-section');
@@ -305,6 +311,7 @@ window.viewDetails = function(id) {
 window.exportSinglePDF = function() { const { jsPDF } = window.jspdf; const doc = new jsPDF(); doc.text(`Tech Sheet: ${currentDetailItem.brand} ${currentDetailItem.model}`, 14, 20); doc.save('spec-sheet.pdf'); };
 
 // --- 7. FORM HANDLING ---
+//CRUD Logic
 function handleSave(e, collection, modalId, renderFn) {
     e.preventDefault();
     const formData = new FormData(e.target);

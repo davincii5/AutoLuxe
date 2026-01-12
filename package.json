@@ -1,0 +1,23 @@
+{
+  "name": "autoluxe-dashboard",
+  "version": "1.0.0",
+  "description": "Car Dealership Management System",
+  "main": "index.html",
+  "scripts": {
+    "start": "http-server . -p 5500 -c-1 -o login.html"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/davincii5/AutoLuxe.git"
+  },
+  "keywords": [
+    "dashboard",
+    "management",
+    "cars"
+  ],
+  "author": "Davincii5",
+  "license": "ISC",
+  "devDependencies": {
+    "http-server": "^14.1.1"
+  }
+}
